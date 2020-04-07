@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import styled from "@emotion/styled";
+import { obtenerDiferenciaYear, calcularMarca, obtenerPlan } from "../helper";
+import PropTypes from "prop-types";
 
 const Campo = styled.div`
     display: flex;
@@ -43,7 +45,7 @@ const Error = styled.div`
     text-align: center;
 `;
 
-const Formulario = () => {
+const Formulario = ({ setResumen, setSpinner }) => {
 
     // State para formulario
     const [datos, setDatos] = useState({
@@ -71,10 +73,27 @@ const Formulario = () => {
         e.preventDefault();
         if(marca.trim()==="" || year.trim()==="" || plan.trim()===""){
             setError(true);
+            setResumen({});
             return;
         }
         setError(false);
-        console.log(datos);
+
+        const diferencia = obtenerDiferenciaYear(parseInt(year));
+
+        let resultado = 2000;
+        resultado -= ((diferencia*0.03)*resultado);
+        resultado *= calcularMarca(marca);
+        resultado *= obtenerPlan(plan);
+
+        setSpinner(true);
+
+        setTimeout(() => {
+            setResumen({
+                datos,
+                cotizacion: Number(resultado.toFixed(2))
+            });
+            setSpinner(false);
+        }, 2000)
     }
 
     return (
@@ -142,6 +161,11 @@ const Formulario = () => {
 
         </form>
     );
+}
+
+Formulario.propTypes = {
+    setResumen: PropTypes.func.isRequired,
+    setSpinner: PropTypes.func.isRequired
 }
  
 export default Formulario;
